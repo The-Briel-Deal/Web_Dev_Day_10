@@ -1,35 +1,47 @@
-const {
-    MongoClient
-} = require("mongodb");
-const assert = require('assert');
-// Connection URI
-const uri =
-    "mongodb://192.168.0.11:27017/?maxPoolSize=20&w=majority";
-// Create a new MongoClient
-const client = new MongoClient(uri);
-async function run() {
-    try {
-        // Connect the client to the server
-        await client.connect();
-        db = client.db("Fruits");
-        collection = db.collection('documents');
+const mongoose = require('mongoose');
 
-        const doc = {
-            name: "Neapolitan pizza",
-            shape: "round"
-        };
-        const result = await collection.insertOne(doc);
-        console.log(
-            `A document was inserted with the _id: ${result.insertedId}`,
-        );
-        
-        await db.command({
-            ping: 1
-        });
-        console.log("Connected successfully to server");
-    } finally {
+const uri ="mongodb://192.168.0.11:27017";
 
-        await client.close();
+mongoose.connect(`${uri}/peopleDB`);
+
+const personSchema = new mongoose.Schema({
+    name: String,
+    age: Number,
+    review: String
+})
+
+const Person = mongoose.model("Person", personSchema);
+
+const randy = new Person({
+    name: "Randy",
+    rating: 23,
+    review: "Has a nice beard."
+});
+
+const charles = new Person({
+    name: "Charles",
+    rating: 53,
+    review: "Really likes dogs..."
+});
+
+const kyle = new Person({
+    name: "Kyle",
+    rating: 14,
+    review: "-_-"
+});
+
+// Person.insertMany([kyle, charles, randy], (err)=>{
+//     if (err){
+//         console.log(err)
+//     }else{
+//         console.log("Succesfully saved all the people to the DB!")
+//     }
+// });
+
+Person.find((err, people)=>{
+    if (err) {
+        console.log(err);
+    } else {
+        console.log(people[1]["name"]);
     }
-}
-run().catch(console.dir);
+});
